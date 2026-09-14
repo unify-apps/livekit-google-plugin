@@ -15,6 +15,7 @@ release **tags** (`v1.0.x`), which are independent of the upstream
 
 | Fork tag | Upstream plugin base | `livekit` (SDK) | `livekit-agents` | pin in `pyproject.toml` |
 | -------- | -------------------- | --------------- | ---------------- | ----------------------- |
+| `v1.0.7` | 1.8.1                | 1.1.18          | 1.8.1            | `livekit-agents>=1.8.1,<1.9` |
 | `v1.0.6` | 1.8.0                | 1.1.17          | 1.8.0            | `livekit-agents>=1.8.0,<1.9` |
 | `v1.0.5` | 1.6.7                | 1.1.13          | 1.6.7            | `livekit-agents>=1.6.7` |
 | `v1.0.4` | 1.6.4                | 1.1.12          | 1.6.4            | `livekit-agents>=1.6.4` |
@@ -29,6 +30,59 @@ only the `livekit-agents>=1.5.0` floor from `pyproject.toml` is known.
 The fork tracks `livekit-agents` closely: the plugin depends on internal
 `livekit-agents` APIs, so a fork tag must be paired with the matching
 `livekit-agents` version above.
+
+---
+
+## v1.0.7 — sync to upstream plugin 1.8.1 (livekit-agents 1.8.1)
+
+**Compatibility:** `livekit==1.1.18`, `livekit-agents==1.8.1`.
+**Base:** upstream `livekit-plugins-google` 1.8.1 (synced from 1.8.0).
+
+**Upstream 1.8.1 is 1.8.0 plus exactly one change:** livekit/agents#6000,
+*"skip context replay on resumed realtime sessions"* (`realtime_api.py` only, +95/-32).
+Nothing else in the package moved — `llm.py`, `stt.py`, `tts.py`, `utils.py`, `beta/`
+are byte-identical to 1.8.0. `pyproject.toml` bumps its own floor to
+`livekit-agents>=1.8.1`, which is why this fork's pin moves to `>=1.8.1,<1.9`.
+
+**One fork patch was fixed upstream and is now dropped.** The stash-and-replay of
+in-flight tool results across an `update_tools` restart (`_pending_tool_result`) is
+gone. Upstream #6000 solves the same failure through a different mechanism: the
+plugin always reconnects with the last session resumption handle, so it now skips
+the full history replay and sends only the diff between the chat context that handle
+stands for and the current one. A tool result that was queued and dropped by the
+restart — or dequeued and mid-send when the socket died — is still marked unsent, so
+the handle's snapshot leaves it out and the reconnect diff re-sends it as a tool
+response to the session that still holds the call open.
+
+Keeping our stash on top of that would have delivered the same result twice. The
+upstream PR that mirrored our patch (livekit/agents#7153) was closed unmerged one
+minute after #6000 landed, for the same reason.
+
+Side effect worth knowing: #6000 also fixes history *duplication*. Before it, every
+reconnect — including the `update_tools` restart after every tool call — replayed the
+local chat context onto a session that already held it.
+
+**Fork patches in this tag** (unchanged from v1.0.6 unless noted):
+- **Realtime tool params preserve pre-filled values** — `use_parameters_json_schema=True`
+  in `realtime/realtime_api.py` and `default` retained in `_GeminiJsonSchema.simplify()`
+  (`utils.py`). Same rationale and same caveat for older Live models as v1.0.5.
+- **gemini-3.1 Live support.** 3.1 reports `mutable_chat_context=False`, which upstream
+  still treats as "no agent-initiated turns at all" — `generate_reply` raises
+  `RealtimeError`, so greetings, handoffs and post-tool prompts never happen. 3.1 does
+  honour `LiveClientRealtimeInput(text=...)`, so `generate_reply` is routed through that
+  on 3.1 and keeps the placeholder-user-turn path on 2.x. **Fixed since v1.0.6:**
+  `instructions` is `NOT_GIVEN` for most agent-initiated turns (`agent_activity` passes
+  `instructions or NOT_GIVEN`), and the 3.1 branch was putting that sentinel on the wire
+  instead of text; it now falls back to the same `"."` nudge the 2.x path uses. The
+  `_generation_completed` flag that drops `model_turn` parts streamed after a turn is
+  finalized is carried forward unchanged.
+- **Recoverable connection errors emitted after the retry backoff.**
+  `_emit_error(recoverable=True)` fires after the reconnect sleep, not before, so a
+  recoverable blip does not tear the agent session down mid-reconnect.
+
+**`scripts/verify.sh`:** the `_pending_tool_result` check is removed along with the
+patch, and the gemini-3.1 check now greps the `NOT_GIVEN` fallback rather than the old
+`LiveClientRealtimeInput(text=instructions)` line.
 
 ---
 

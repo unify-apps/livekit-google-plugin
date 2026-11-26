@@ -15,6 +15,7 @@ release **tags** (`v1.0.x`), which are independent of the upstream
 
 | Fork tag | Upstream plugin base | `livekit` (SDK) | `livekit-agents` | pin in `pyproject.toml` |
 | -------- | -------------------- | --------------- | ---------------- | ----------------------- |
+| `v1.0.9` | 1.9.0                | 1.2.1           | 1.9.0            | `livekit-agents>=1.9.0,<1.10` |
 | `v1.0.8` | 1.9.0                | 1.2.1           | 1.9.0            | `livekit-agents>=1.9.0,<1.10` |
 | `v1.0.7` | 1.8.1                | 1.1.18          | 1.8.1            | `livekit-agents>=1.8.1,<1.9` |
 | `v1.0.6` | 1.8.0                | 1.1.17          | 1.8.0            | `livekit-agents>=1.8.0,<1.9` |
@@ -31,6 +32,18 @@ only the `livekit-agents>=1.5.0` floor from `pyproject.toml` is known.
 The fork tracks `livekit-agents` closely: the plugin depends on internal
 `livekit-agents` APIs, so a fork tag must be paired with the matching
 `livekit-agents` version above.
+
+---
+
+## v1.0.9 — fix Gemini 3.8 Flash thinking_level default and None thinking_config
+
+**Compatibility:** `livekit==1.2.1`, `livekit-api>=1.2.2`, `livekit-agents==1.9.0`.
+**Base:** `v1.0.8` (upstream `livekit-plugins-google` 1.9.0).
+
+**Changes:**
+- Exclude `gemini-3.8` from `_is_gemini_3_flash_model()` in `llm.py` so `gemini-3.8-flash` never defaults to `thinking_level="minimal"`, which the Gemini API rejects with 400 (`Thinking level MINIMAL is not supported for this model`).
+- Normalize `thinking_config=None` to `NOT_GIVEN` in `LLM.__init__` and `RealtimeModel.__init__` so an omitted `thinking_config` neither triggers a default `thinking_level` nor raises `AttributeError` on `None.thinking_level` in `RealtimeModel`.
+- Fall back to `"gemini-3.8-flash"` in `LLM.__init__` when `model` is `NOT_GIVEN` or empty so callers omitting `model` do not fail `chat()` with `AttributeError`.
 
 ---
 

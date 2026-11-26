@@ -405,6 +405,9 @@ class RealtimeModel(llm.RealtimeModel):
 
         _warn_model_api_mismatch(model, use_vertexai)
 
+        if thinking_config is None:
+            thinking_config = NOT_GIVEN
+
         if (
             not use_vertexai
             and model.removeprefix("models/") == "gemini-3.8-live"

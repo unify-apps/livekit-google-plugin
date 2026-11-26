@@ -137,7 +137,7 @@ def _function_calling_config(
 def _is_gemini_3_flash_model(model: str) -> bool:
     """Check if model is Gemini 3 Flash"""
     m = model.lower()
-    return "gemini-3" in m and "flash" in m
+    return "gemini-3" in m and "flash" in m and "gemini-3.8" not in m
 
 
 def _requires_thought_signatures(model: str) -> bool:
@@ -261,6 +261,10 @@ class LLM(llm.LLM):
             media_resolution (types.MediaResolution, optional): The media resolution for the request. Defaults to None.
         """  # noqa: E501
         super().__init__()
+        if not is_given(model) or not model:
+            model = "gemini-3.8-flash"
+        if thinking_config is None or (isinstance(thinking_config, dict) and not thinking_config):
+            thinking_config = NOT_GIVEN
         gcp_project = project if is_given(project) else os.environ.get("GOOGLE_CLOUD_PROJECT")
         gcp_location: str | None = (
             location

@@ -6,7 +6,7 @@
 #
 # The runtime checks need a python that already has this package AND the matching
 # livekit-agents installed:
-#   uv venv .venv && .venv/bin/python -m pip install "livekit-agents==1.8.1" .
+#   uv venv .venv && .venv/bin/python -m pip install "livekit-agents==1.9.0" .
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PY="${1:-}"
@@ -18,7 +18,6 @@ echo "== fork patches still present =="
 check() { grep -q "$2" "$1" && echo "  OK   $3" || { echo "  MISS $3"; exit 1; }; }
 check livekit/plugins/google/utils.py                'intentionally keep "default"'        'keep JSON-schema "default" in simplify()'
 check livekit/plugins/google/realtime/realtime_api.py 'use_parameters_json_schema=True'     'send parameters_json_schema on realtime'
-check livekit/plugins/google/realtime/realtime_api.py 'text=instructions if is_given' 'gemini-3.1 generate_reply'
 check livekit/plugins/google/realtime/realtime_api.py '_generation_completed'               'drop stale model_turn after turn end'
 check livekit/plugins/google/realtime/realtime_api.py 'emit after the backoff'              'emit recoverable errors after backoff'
 

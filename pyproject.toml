@@ -30,18 +30,20 @@ dependencies = [
     # 2.13 is the floor for the Live transcription surface this package uses:
     # LiveServerContent.interim_input_transcription landed in 2.9 and
     # AudioTranscriptionConfig.custom_vocabulary in 2.13.
-    "google-genai >= 2.13; python_version >= '3.10'",
+    # 3.2 is upstream 1.9.0's floor (mid-session context_update and the Decisions API).
+    "google-genai >= 3.2.0; python_version >= '3.10'",
+    "httpx2 >= 2.12, < 3",
     # Upper bound is deliberate: this package calls internal livekit-agents APIs.
     # v1.0.5 (vendored 1.6.7, pinned only >=1.6.7) silently resolved against agents
     # 1.8.0, which added a keyword to RealtimeModel.session() and made every realtime
     # session raise TypeError. Bump this range in the same commit as an upstream sync.
-    "livekit-agents>=1.8.1,<1.9",
+    "livekit-agents>=1.9.0,<1.10",
 ]
 
 [project.urls]
 Documentation = "https://docs.livekit.io"
 Website = "https://livekit.io/"
-Source = "https://github.com/Darshak03/livekit-google-plugin"
+Source = "https://github.com/unify-apps/livekit-google-plugin"
 Upstream = "https://github.com/livekit/agents"
 
 [tool.hatch.version]

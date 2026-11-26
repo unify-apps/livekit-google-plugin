@@ -15,6 +15,7 @@ release **tags** (`v1.0.x`), which are independent of the upstream
 
 | Fork tag | Upstream plugin base | `livekit` (SDK) | `livekit-agents` | pin in `pyproject.toml` |
 | -------- | -------------------- | --------------- | ---------------- | ----------------------- |
+| `v1.0.8` | 1.9.0                | 1.2.1           | 1.9.0            | `livekit-agents>=1.9.0,<1.10` |
 | `v1.0.7` | 1.8.1                | 1.1.18          | 1.8.1            | `livekit-agents>=1.8.1,<1.9` |
 | `v1.0.6` | 1.8.0                | 1.1.17          | 1.8.0            | `livekit-agents>=1.8.0,<1.9` |
 | `v1.0.5` | 1.6.7                | 1.1.13          | 1.6.7            | `livekit-agents>=1.6.7` |
@@ -30,6 +31,40 @@ only the `livekit-agents>=1.5.0` floor from `pyproject.toml` is known.
 The fork tracks `livekit-agents` closely: the plugin depends on internal
 `livekit-agents` APIs, so a fork tag must be paired with the matching
 `livekit-agents` version above.
+
+---
+
+## v1.0.8 — sync to upstream plugin 1.9.0 (livekit-agents 1.9.0)
+
+**Compatibility:** `livekit==1.2.1`, `livekit-api>=1.2.2`, `livekit-agents==1.9.0`.
+**Base:** upstream `livekit-plugins-google` 1.9.0 (synced from 1.8.1).
+
+**Why:** Gemini 3.8 Live (`gemini-3.8-live`, `gemini-3.8-live-extended-thinking`). Upstream
+added both in 1.8.2 for the Gemini API, and `gemini-3.8-live` on Vertex AI in 1.8.5, with an
+error when `thinking_level` is set on `gemini-3.8-live` (use the extended-thinking model).
+Extended thinking stays Gemini-API only.
+
+**Dependencies (upstream 1.9.0's):** `google-genai>=3.2.0`, `httpx2>=2.12,<3`, and
+`livekit-agents>=1.9.0,<1.10`. livekit-agents 1.8.7+ moves openai to 3.x, mcp to 2.x and
+anthropic to 1.x, all on `httpx2`.
+
+**Dropped: the gemini-3.1 `generate_reply` patch.** Upstream now marks every model's chat
+context mutable and, for the models in `MODELS_WITHOUT_REPLY_PLACEHOLDER` (3.1, 3.8), sends
+no `"."` placeholder turn and wraps `instructions` in a user turn. Our realtime-text-input
+route is superseded.
+
+**Changed: the stale `model_turn` guard now covers 3.8.** A tool call marks the turn
+finished for the models upstream lists in `MODELS_WITHOUT_REPLY_PLACEHOLDER` (was: any model
+name containing `"3.1"`). Without it, on 3.8 the guard would drop the model's reply to the
+tool result.
+
+**Kept, unchanged:** `use_parameters_json_schema=True` for realtime tools, keeping `default`
+in `simplify()`, and emitting recoverable connection errors after the backoff. Upstream 1.9.0
+still sends `use_parameters_json_schema=False`, still drops `default`, and still emits
+before the sleep.
+
+The repository moved from `Darshak03/livekit-google-plugin` to
+`unify-apps/livekit-google-plugin`; older tags are the same commits.
 
 ---
 

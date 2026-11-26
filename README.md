@@ -33,12 +33,12 @@ upstream plugin version number.
   tools and preserves `default` for plain function tools. See
   [CHANGELOG.md](CHANGELOG.md) → **v1.0.5** for the full rationale and the caveat for
   older Live models.
-- **Realtime stability tweaks:** gemini-3.1 Live support (`generate_reply` routed
-  through realtime text input, and dropping `model_turn` parts that arrive after a
-  turn is already finalized); and emitting recoverable connection errors *after* the
-  retry backoff rather than before it. The stash-and-replay of tool results across
-  `update_tools` reconnects was dropped in v1.0.7 — upstream 1.8.1 solves the same
-  problem with a session-resumption diff.
+- **Realtime stability tweaks:** dropping `model_turn` parts that arrive after a turn is
+  already finalized (gemini-3.1 and 3.8 Live end a turn on a tool call without a
+  `generation_complete`), and emitting recoverable connection errors *after* the retry
+  backoff rather than before it. The gemini-3.1 `generate_reply` patch was dropped in
+  v1.0.8 (upstream 1.8.2+ handles 3.1 and 3.8 itself), and the stash-and-replay of tool
+  results across `update_tools` reconnects in v1.0.7 (upstream 1.8.1).
 
 For the exact per-tag differences, see **[CHANGELOG.md](CHANGELOG.md)**.
 
@@ -47,13 +47,13 @@ For the exact per-tag differences, see **[CHANGELOG.md](CHANGELOG.md)**.
 Install a specific tag directly from Git — always pin a tag, never `main`:
 
 ```bash
-pip install "git+https://github.com/Darshak03/livekit-google-plugin.git@v1.0.7"
+pip install "git+https://github.com/unify-apps/livekit-google-plugin.git@v1.0.8"
 ```
 
 Or in `requirements.txt` / `pyproject.toml`:
 
 ```
-livekit-plugins-google @ git+https://github.com/Darshak03/livekit-google-plugin.git@v1.0.7
+livekit-plugins-google @ git+https://github.com/unify-apps/livekit-google-plugin.git@v1.0.8
 ```
 
 ## Choosing a version
@@ -63,6 +63,7 @@ the plugin depends on internal `livekit-agents` APIs, so mismatched versions bre
 
 | Fork tag | `livekit-plugins-google` | `livekit` | `livekit-agents` |
 | -------- | ------------------------ | --------- | ---------------- |
+| `v1.0.8` | 1.9.0                    | 1.2.1     | 1.9.0            |
 | `v1.0.7` | 1.8.1                    | 1.1.18    | 1.8.1            |
 | `v1.0.6` | 1.8.0                    | 1.1.17    | 1.8.0            |
 | `v1.0.5` | 1.6.7                    | 1.1.13    | 1.6.7            |
@@ -71,7 +72,7 @@ the plugin depends on internal `livekit-agents` APIs, so mismatched versions bre
 | `v1.0.2` | 1.5.4                    | 1.1.5     | 1.5.4            |
 
 Full details and older tags: **[CHANGELOG.md](CHANGELOG.md)**. All published tags:
-<https://github.com/Darshak03/livekit-google-plugin/tags>.
+<https://github.com/unify-apps/livekit-google-plugin/tags>.
 
 ## Relationship to upstream
 

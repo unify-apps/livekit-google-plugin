@@ -40,7 +40,7 @@ from livekit.agents.utils import is_given
 
 from .log import logger
 from .models import ChatModels
-from .utils import create_tools_config, to_response_format
+from .utils import create_tools_config, to_response_format, with_gemini_api_version
 from .version import __version__
 
 
@@ -376,7 +376,7 @@ class LLM(llm.LLM):
             project=gcp_project,
             location=gcp_location,
             credentials=credentials,
-            http_options=client_http_options,
+            http_options=with_gemini_api_version(client_http_options, use_vertexai),
         )
         # Store thought_signatures for Gemini 2.5+ multi-turn function calling
         self._thought_signatures: dict[str, bytes] = {}

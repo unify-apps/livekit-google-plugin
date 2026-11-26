@@ -31,7 +31,12 @@ from livekit.agents.utils import audio as audio_utils, images, is_given, resolve
 from livekit.plugins.google.realtime.api_proto import ClientEvents, LiveAPIModels, Voice
 
 from ..log import logger
-from ..utils import create_function_response, create_tools_config, get_tool_results_for_realtime
+from ..utils import (
+    create_function_response,
+    create_tools_config,
+    get_tool_results_for_realtime,
+    with_gemini_api_version,
+)
 from ..version import __version__
 
 INPUT_AUDIO_SAMPLE_RATE = 16000
@@ -546,6 +551,7 @@ class RealtimeSession(llm.RealtimeSession):
         )
         if api_version:
             http_options.api_version = api_version
+        with_gemini_api_version(http_options, self._opts.vertexai)
         if not http_options.headers:
             http_options.headers = {}
         http_options.headers["x-goog-api-client"] = f"livekit-agents/{__version__}"

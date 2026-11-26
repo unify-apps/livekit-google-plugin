@@ -15,6 +15,7 @@ release **tags** (`v1.0.x`), which are independent of the upstream
 
 | Fork tag | Upstream plugin base | `livekit` (SDK) | `livekit-agents` | pin in `pyproject.toml` |
 | -------- | -------------------- | --------------- | ---------------- | ----------------------- |
+| `v1.0.10` | 1.9.0               | 1.2.1           | 1.9.0            | `livekit-agents>=1.9.0,<1.10` |
 | `v1.0.9` | 1.9.0                | 1.2.1           | 1.9.0            | `livekit-agents>=1.9.0,<1.10` |
 | `v1.0.8` | 1.9.0                | 1.2.1           | 1.9.0            | `livekit-agents>=1.9.0,<1.10` |
 | `v1.0.7` | 1.8.1                | 1.1.18          | 1.8.1            | `livekit-agents>=1.8.1,<1.9` |
@@ -32,6 +33,25 @@ only the `livekit-agents>=1.5.0` floor from `pyproject.toml` is known.
 The fork tracks `livekit-agents` closely: the plugin depends on internal
 `livekit-agents` APIs, so a fork tag must be paired with the matching
 `livekit-agents` version above.
+
+---
+
+## v1.0.10 — default the Gemini API version to v1beta
+
+**Compatibility:** `livekit==1.2.1`, `livekit-api>=1.2.2`, `livekit-agents==1.9.0`.
+**Base:** `v1.0.9` (upstream `livekit-plugins-google` 1.9.0).
+
+**Why:** `google-genai` 3.x changed the Gemini API default version from `v1beta` to `v1`.
+Gemini Live, Gemini STT and Gemini TTS exist only on `v1beta`, so with no version set the
+Live socket answers HTTP 404 and TTS answers 400 `Unknown name "speechConfig"`.
+
+**Changes:**
+- `utils.with_gemini_api_version()` sets `v1beta` when the client is for the Gemini API (not
+  VertexAI) and no version was given; VertexAI keeps the SDK default (`v1beta1`).
+- Applied where each client is built: `LLM`, `RealtimeModel` (after its `v1alpha` switch for
+  affective dialog / proactivity), `beta.GeminiSTT`, `beta.GeminiTTS` and
+  `beta.GeminiTranslation`. An explicit `api_version` or `http_options.api_version` wins.
+- `beta.GeminiTTS` takes a new `api_version` argument.
 
 ---
 

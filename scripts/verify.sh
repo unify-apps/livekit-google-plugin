@@ -20,6 +20,10 @@ check livekit/plugins/google/utils.py                'intentionally keep "defaul
 check livekit/plugins/google/realtime/realtime_api.py 'use_parameters_json_schema=True'     'send parameters_json_schema on realtime'
 check livekit/plugins/google/realtime/realtime_api.py '_generation_completed'               'drop stale model_turn after turn end'
 check livekit/plugins/google/realtime/realtime_api.py 'emit after the backoff'              'emit recoverable errors after backoff'
+check livekit/plugins/google/utils.py                'def with_gemini_api_version'          'default the Gemini API version to v1beta'
+for f in llm.py realtime/realtime_api.py beta/gemini_stt.py beta/gemini_tts.py beta/gemini_translation.py; do
+  check "livekit/plugins/google/$f" 'with_gemini_api_version(' "v1beta default applied in $f"
+done
 
 if [ -z "$PY" ]; then
   echo "== runtime checks skipped (pass a python from an env with this package installed) =="

@@ -20,6 +20,15 @@ from .tools import GeminiTool
 __all__ = ["create_tools_config"]
 
 
+GEMINI_API_VERSION = "v1beta"
+
+
+def with_gemini_api_version(http_options: types.HttpOptions, vertexai: bool | None) -> types.HttpOptions:
+    if not vertexai and http_options.api_version is None:
+        http_options.api_version = GEMINI_API_VERSION
+    return http_options
+
+
 def create_tools_config(
     tool_ctx: llm.ToolContext,
     *,

@@ -17,6 +17,8 @@ from livekit.agents.types import (
 )
 from livekit.agents.utils import is_given
 
+from ..utils import with_gemini_api_version
+
 from ..log import logger
 
 GEMINI_TTS_MODELS = Literal[
@@ -117,6 +119,7 @@ class TTS(tts.TTS):
         instructions: NotGivenOr[str | None] = NOT_GIVEN,
         speakers: NotGivenOr[dict[str, str]] = NOT_GIVEN,
         speaker: NotGivenOr[str] = NOT_GIVEN,
+        api_version: NotGivenOr[str] = NOT_GIVEN,
     ) -> None:
         """
         Create a new instance of Gemini TTS.
@@ -135,6 +138,7 @@ class TTS(tts.TTS):
             instructions (str, optional): Control the style, tone, accent, and pace using prompts. See https://ai.google.dev/gemini-api/docs/speech-generation#controllable
             speakers (dict[str, str], optional): Speaker name -> voice, for a multi-speaker voice config. Replaces `voice_name`.
             speaker (str, optional): Which of `speakers` this instance voices. Required with `speakers`, and switchable via `update_options`.
+            api_version (str, optional): The API version for the client. Defaults to "v1beta" on the Gemini API and to the SDK default on VertexAI.
         """  # noqa: E501
         super().__init__(
             capabilities=tts.TTSCapabilities(streaming=False),
@@ -216,6 +220,10 @@ class TTS(tts.TTS):
             vertexai=use_vertexai,
             project=gcp_project,
             location=gcp_location,
+            http_options=with_gemini_api_version(
+                types.HttpOptions(api_version=api_version if is_given(api_version) else None),
+                use_vertexai,
+            ),
         )
 
     class Markup(tts.TTS.Markup):

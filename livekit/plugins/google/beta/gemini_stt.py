@@ -38,6 +38,8 @@ from livekit.agents.types import (
 )
 from livekit.agents.utils import is_given
 
+from ..utils import with_gemini_api_version
+
 from ..log import logger
 
 # Must be a Live-capable model: the plain chat models (e.g. gemini-2.5-flash) are
@@ -239,7 +241,9 @@ class RecognizeStream(stt.RecognizeStream):
 
         client_kwargs: dict[str, Any] = {
             "api_key": self._api_key,
-            "http_options": self._http_options,
+            "http_options": with_gemini_api_version(
+                types.HttpOptions.model_validate(self._http_options or {}).model_copy(), is_enterprise
+            ),
         }
         if is_enterprise:
             client_kwargs["enterprise"] = True

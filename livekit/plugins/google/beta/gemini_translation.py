@@ -44,6 +44,8 @@ from livekit.agents.types import (
 )
 from livekit.agents.utils import audio as audio_utils, is_given
 
+from ..utils import with_gemini_api_version
+
 from ..log import logger
 from ..version import __version__
 
@@ -394,6 +396,7 @@ class GeminiTranslationSession(TranslationModelSession[None]):
         http_options = self._opts.http_options or types.HttpOptions(
             timeout=int(self._opts.conn_options.timeout * 1000)
         )
+        with_gemini_api_version(http_options, self._opts.vertexai)
         if not http_options.headers:
             http_options.headers = {}
         http_options.headers["x-goog-api-client"] = f"livekit-agents/{__version__}"
